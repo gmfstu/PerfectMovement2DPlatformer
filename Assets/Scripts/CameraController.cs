@@ -78,13 +78,13 @@ public class CameraController : MonoBehaviour
 
     void Start()
     {
-        fieldOfView = GetComponent<Camera>().GetGateFittedFieldOfView(); // TODO: who knows if this works how i want it to
+        fieldOfView = GetComponent<Camera>().GetGateFittedFieldOfView(); // worried about this but it works! :)
         Debug.Log("Field of view: " + fieldOfView);
         float distance = verticalSize/(2 * Mathf.Tan(fieldOfView * Mathf.Deg2Rad / 2));
         Debug.Log("Distance: " + distance);
         transform.position = new Vector3(transform.position.x, transform.position.y, -distance);
         goTo = transform.position;
-        darkScreenStart = DarkScreen.transform.position.y;
+        darkScreenStart = DarkScreen.transform.localPosition.y;
         moveScreenDirection = 0;
     }
 
@@ -146,10 +146,8 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void ScreenHandler() {
         if (moveScreenDirection < 0) {
-            float difference = transform.position.y - darkScreenStart;
-            DarkScreen.position = new Vector3(transform.position.x, 
-                Mathf.Max(DarkScreen.position.y + (difference * Time.deltaTime / 2), transform.position.y), 1);
-            if (DarkScreen.position.y == transform.position.y) {
+            DarkScreen.localPosition = new Vector3(0, Mathf.Max(DarkScreen.localPosition.y + (-darkScreenStart * Time.deltaTime / 1), 0), 1);
+            if (DarkScreen.localPosition.y == 0) {
                 // move camera & character
                 moveScreenDirection = 1;
                 transform.position = new Vector3(respawnRoom.transform.position.x, respawnRoom.transform.position.y, 
@@ -159,10 +157,8 @@ public class CameraController : MonoBehaviour
         }
 
         if (moveScreenDirection > 0) {
-            float difference = darkScreenStart - transform.position.y;
-            DarkScreen.position = new Vector3(transform.position.x, 
-                Mathf.Min(DarkScreen.position.y + (difference * Time.deltaTime / 2), darkScreenStart), 1);
-            if (DarkScreen.position.y == darkScreenStart) {
+            DarkScreen.localPosition = new Vector3(0, Mathf.Min(DarkScreen.localPosition.y + (darkScreenStart * Time.deltaTime / 1), darkScreenStart), 1);
+            if (DarkScreen.localPosition.y == darkScreenStart) {
                 // finish coroutine & resume play
                 Target.GetComponent<CharacterPhysics>().RespawnFinished();
                 respawning = false;
